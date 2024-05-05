@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        form {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        input[type="text"],
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Email Verification</h2>
+<form id="verificationForm">
+    <input type="text" id="verificationCode" name="verification_code" placeholder="Enter Verification Code" required>
+    <!-- Add a hidden input field to store the session token -->
+    <input type="hidden" id="token" name="token" value="">
+    <input type="submit" value="Verify">
+</form>
+
+<script>
+    // Function to retrieve session token from URL query parameter
+    function getSessionToken() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('token');
+    }
+
+    // Function to set session token in the hidden input field
+    function setSessionToken(token) {
+        document.getElementById("token").value = token;
+    }
+
+    document.getElementById("verificationForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+        
+        const verificationCode = document.getElementById("verificationCode").value;
+        const token = getSessionToken(); // Get the session token
+        
+        setSessionToken(token); // Set the session token in the hidden input field
+        
+        try {
+            const response = await fetch("/verify", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ verificationCode, token }) // Include the token in the request body
+            });
+
+            const responseData = await response.json();
+            
+            if (responseData.success) {
+                alert("Verification successful!");
+                // Redirect to bncc.net after successful verification
+                window.location.href = "https://bncc.net";
+            } else {
+                alert("Verification failed. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("An error occurred. Please try again later.");
+        }
+    });
+</script>
+
+
+</body>
+</html>
